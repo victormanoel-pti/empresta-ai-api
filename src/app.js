@@ -1,26 +1,14 @@
 import express from "express";
-import compareKeys from "./utils/validate.js";
+import compareKeys from "./utils/compareKeys.js";
+import userFields from "./utils/mocks.js";
+import isObjectKeysEmpty from "./utils/isObjectKeysEmpty.js";
+import response from "./utils/response.js";
 
 const app = express();
 app.use(express.json());
 
-const usuarios = [
-    {
-        "nome": "Victor",
-        "sobrenome": "Manoel", 
-        "cidade": "SP",
-        "genero": "Masculino",
-        "dataNascimento": new Date(),
-        "email":"victor@email.com",
-        "senha":"senha",
-        /*
-        "amigos": {
-            1: "Victor",
-            2: "Manoel"
-        }
-        */
-    }
-]
+
+let usuarios = [];
 
 app.get("/", (req, res)=> {
     res.status(200).json({"success": true, "message": "API funcionando!"});
@@ -29,12 +17,6 @@ app.get("/", (req, res)=> {
 app.get("/usuarios", (req, res)=> {
     res.status(200).json(usuarios);
 })
-
-/*
-app.get("/amigos", (req, res)=> {
-    res.status(200).json(usuarios[0].amigos);
-});
-*/
 
 app.post("/login", (req, res)=> {
     let dados = req.body;
@@ -48,11 +30,16 @@ app.post("/login", (req, res)=> {
 });
 
 app.post("/cadastro", (req, res)=> {
-    if(compareKeys(usuarios[0], req.body)){
-        usuarios.push(req.body);
-        res.status(201).json({"success": true, "message": "Cadastro realizado com sucesso!"});
+
+    if(compareKeys(userFields, req.body)){
+        if(isObjectKeysEmpty(req.body)){
+            res.status(400).json(response(false, "Campo(s) inválido(s)."));
+        }else{
+            usuarios.push(req.body);
+            res.status(201).json(response(true, "Cadastro realizado com sucesso."));
+        }
     }else{
-        res.status(422).json({"success": false, "message": "Oppss... algo deu errado, tente novamente!"});
+        res.status(422).json(response(false, "Campo(s) inválido(s)."));
     }
 });
 
