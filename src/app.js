@@ -27,6 +27,20 @@ function checkJwt(req, res, next) {
     })
 }
 
+function doesEmailExists(arr, email){
+    if (arr.length <= 0){
+        return false;
+    }else{
+        console.log(email)
+        for (let i = 0; i < arr.length; i++) {
+            if(arr[i].email === email){
+                return true;
+            }
+            return false;
+        }
+    }
+}
+
 app.get("/", (req, res)=> {
     res.status(200).json({"success": true, "message": "API funcionando!"});
 });
@@ -55,16 +69,23 @@ app.post("/logout", (req, res)=> {
 
 app.post("/cadastro", (req, res)=> {
 
-    if(compareKeys(userFields, req.body)){
-        if(isObjectKeysEmpty(req.body)){
-            res.status(400).json(response(false, "Campo(s) inválido(s)."));
-        }else{
-            usuarios.push(req.body);
-            res.status(201).json(response(true, "Cadastro realizado com sucesso."));
-        }
+    if(doesEmailExists(usuarios, req.body["email"])){
+        res.status(400).json(response(false, "Email já está cadastrado."));
     }else{
-        res.status(422).json(response(false, "Campo(s) inválido(s)."));
+        if(compareKeys(userFields, req.body)){
+            if(isObjectKeysEmpty(req.body)){
+                res.status(400).json(response(false, "Campo(s) inválido(s)."));
+            }else{
+                usuarios.push(req.body);
+                res.status(201).json(response(true, "Cadastro realizado com sucesso."));
+            }
+        }else{
+            res.status(422).json(response(false, "Campo(s) inválido(s)."));
+        }
     }
+    
+    
+
 });
 
 
