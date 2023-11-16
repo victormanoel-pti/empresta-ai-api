@@ -1,20 +1,22 @@
 import express from "express";
 import jsonwebtoken from "jsonwebtoken";
+import {v4 as uuid} from "uuid";
 import compareKeys from "./utils/compareKeys.js";
 import userFields from "./utils/mocks.js";
 import isObjectKeysEmpty from "./utils/isObjectKeysEmpty.js";
 import response from "./utils/response.js";
+import crud from "./utils/user-crud.js";
+import crudFriends from "./utils/friends-crud.js";
 
 const app = express();
-let jwt = jsonwebtoken;
-
 const secret = "123";
 
+let jwt = jsonwebtoken;
 let blacklist = [];
+let usuarios = [];
 
 app.use(express.json());
 
-let usuarios = [];
 
 function checkJwt(req, res, next) {
     const token = req.headers["authorization"];
@@ -22,27 +24,31 @@ function checkJwt(req, res, next) {
         if(err){
             return res.status(401).json();
         }
-        req.email = decodedJwt.email;
+        req.id = decodedJwt.id;
         next();
     })
 }
 
-function doesEmailExists(arr, email){
-    if (arr.length <= 0){
-        return false;
-    }else{
-        console.log(email)
-        for (let i = 0; i < arr.length; i++) {
-            if(arr[i].email === email){
-                return true;
-            }
-            return false;
-        }
-    }
-}
 
 app.get("/", (req, res)=> {
     res.status(200).json({"success": true, "message": "API funcionando!"});
+});
+
+app.get("/amigos", checkJwt, (req, res)=> {
+    let data = crudFriends.findFriends(req.id);
+    if(JSON.stringify(data) === '{}'){
+        res.status(404).json(response(true, "Amigos não encontrados."));
+    }else{
+        res.status(200).json(response(true, data));
+    }
+});
+
+app.delete("/amigos/excluir/:id", checkJwt, (req, res)=> {
+    if(crudFriends.deleteFriendById(req.params.id, checkJwt.id)){
+        res.status(404).json(response(false, "Amigo nao encontrado"));
+    }else{
+        res.status(204).json();
+    }
 });
 
 app.get("/usuarios", checkJwt ,(req, res)=> {
@@ -51,15 +57,14 @@ app.get("/usuarios", checkJwt ,(req, res)=> {
 })
 
 app.post("/login", (req, res)=> {
-    let dados = req.body;
-    
-    for(let i = 0; i < usuarios.length; i++){
-        if(dados["email"] === usuarios[i].email && dados["senha"] === usuarios[i].senha){
-            const token = jwt.sign({email: usuarios[i].email}, secret, {expiresIn: 600});
-            res.status(200).json(response(true, token));
-        }
-    }
+    let data = req.body;
+    let found = crud.findLogin(data.email, data.senha);
+    if(!found){
         res.status(401).json(response(false, "Email e/ou senha incorreto(s)"));
+    }
+    const token = jwt.sign({id: found.id}, secret, {expiresIn: 600});
+    res.status(200).json(response(true, token));
+        
 });
 
 app.post("/logout", (req, res)=> {
@@ -68,24 +73,18 @@ app.post("/logout", (req, res)=> {
 });
 
 app.post("/cadastro", (req, res)=> {
-
-    if(doesEmailExists(usuarios, req.body["email"])){
-        res.status(400).json(response(false, "Email já está cadastrado."));
-    }else{
-        if(compareKeys(userFields, req.body)){
-            if(isObjectKeysEmpty(req.body)){
-                res.status(400).json(response(false, "Campo(s) inválido(s)."));
-            }else{
-                usuarios.push(req.body);
-                res.status(201).json(response(true, "Cadastro realizado com sucesso."));
-            }
+    if(compareKeys(req.body,userFields)){
+        if(isObjectKeysEmpty(req.body)){
+            res.status(400).json(response(false, "Campo(s) inválido(s)."));
         }else{
-            res.status(422).json(response(false, "Campo(s) inválido(s)."));
+            req.body.id = uuid();
+            crud.updateUsers(req.body);
+            res.status(201).json(response(true, "Cadastro realizado com sucesso."));
         }
+    }else{
+        res.status(400).json(response(false, "Campo(s) inválido(s)."));
     }
-    
-    
-
+        
 });
 
 
