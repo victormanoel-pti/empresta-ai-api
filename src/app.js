@@ -126,13 +126,4 @@ app.get("/grupos/detalhes", (req, res)=> {
     }
 });
 
-// app.post("/grupos/sair", (req, res)=> {
-//     const result = crudGroups.groupDetails(req.body.groupId, req.body.userId); 
-//     if(JSON.stringify(result) === '{}') {
-//         res.status(404).json(response(true, "Grupo não encontrado."));
-//     }else {
-//         res.status(200).json(response(true, result));
-//     }
-// });
-
 export default app;
