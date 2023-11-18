@@ -2,7 +2,7 @@ import fs from "fs";
 
 const filePath = `/src/databases/groups.json`;
 
-const crudGroups = {
+const groupService = {
     addGroup(data, id = "") {
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
                 
@@ -62,4 +62,4 @@ const crudGroups = {
     }
 }
 
-export default crudGroups;
+export default groupService;

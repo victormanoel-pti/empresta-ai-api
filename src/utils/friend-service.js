@@ -2,7 +2,7 @@ import fs from "fs";
 
 const filePath = `/src/databases/users.json`;
 
-const crudFriends = {
+const friendService = {
     
     findFriends(userId){
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
@@ -38,4 +38,4 @@ const crudFriends = {
 
 }
 
-export default crudFriends;
+export default friendService;

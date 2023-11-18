@@ -2,7 +2,7 @@ import fs from "fs";
 
 const filePath = `/src/databases/users.json`;
 
-const crudUsers = {
+const userService = {
     addUsers(data, id = ""){
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
         for(let i =0; i < fileData.users.length; i++){
@@ -62,4 +62,4 @@ const crudUsers = {
     }
 }
 
-export default crudUsers;
+export default userService;

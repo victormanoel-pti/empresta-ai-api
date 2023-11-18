@@ -5,9 +5,9 @@ import compareKeys from "./utils/compareKeys.js";
 import { userModel, groupModel } from "./utils/models.js";
 import isObjectKeysEmpty from "./utils/isObjectKeysEmpty.js";
 import response from "./utils/response.js";
-import crudUsers from "./utils/user-crud.js";
-import crudFriends from "./utils/friends-crud.js";
-import crudGroups from "./utils/group-crud.js";
+import userService from "./utils/user-service.js";
+import friendService from "./utils/friend-service.js";
+import groupService from "./utils/group-service.js";
 
 const app = express();
 const secret = "123";
@@ -34,7 +34,7 @@ app.get("/", (req, res)=> {
 });
 
 app.get("/amigos", checkJwt, (req, res)=> {
-    let data = crudFriends.findFriends(req.id);
+    let data = friendService.findFriends(req.id);
     if(JSON.stringify(data) === '{}'){
         res.status(404).json(response(true, "Amigos não encontrados."));
     }else{
@@ -43,9 +43,9 @@ app.get("/amigos", checkJwt, (req, res)=> {
 });
 
 app.delete("/amigos/excluir/:id", checkJwt, (req, res)=> {
-    let result = crudFriends.deleteFriendById(req.params.id, req.id); 
+    let result = friendService.deleteFriendById(req.params.id, req.id); 
     if(result !== -1 || result !== false){
-        crudUsers.addUsers(result, req.id)
+        userService.addUsers(result, req.id)
         res.status(200).json()
     }
     res.status(404).json();
@@ -58,7 +58,7 @@ app.get("/usuarios", checkJwt ,(req, res)=> {
 
 app.post("/login", (req, res)=> {
     let data = req.body;
-    let found = crudUsers.findLogin(data.email, data.senha);
+    let found = userService.findLogin(data.email, data.senha);
     if(!found){
         res.status(401).json(response(false, "Email e/ou senha incorreto(s)"));
     }
@@ -77,7 +77,7 @@ app.post("/cadastro", (req, res)=> {
             res.status(400).json(response(false, "Campo(s) inválido(s)."));
         }else{
             req.body.id = uuid();
-            crudUsers.addUsers(req.body);
+            userService.addUsers(req.body);
             res.status(201).json(response(true, "Cadastro realizado com sucesso."));
         }
     }else{
@@ -91,7 +91,7 @@ app.post("/grupos/criar", (req, res) => {
             res.status(400).json(response(false, "Campo(s) não preenchido(s)."));
         }else{
             req.body.id = uuid();
-            crudGroups.addGroup(req.body);
+            groupService.addGroup(req.body);
             res.status(201).json(response(true, "Grupo criado com sucesso."));
         }
     }else{
@@ -100,7 +100,7 @@ app.post("/grupos/criar", (req, res) => {
 });
 
 app.get("/grupos/meus-grupos", checkJwt, (req, res)=> {
-    const result = crudGroups.findGroupsByUserId(req.body.userId);
+    const result = groupService.findGroupsByUserId(req.body.userId);
     if(JSON.stringify(result) === '{}'){
         res.status(404).json(response(true, "Não há grupos para esse usuário."));
     }else{
@@ -109,7 +109,7 @@ app.get("/grupos/meus-grupos", checkJwt, (req, res)=> {
 });
 
 app.delete("/grupos/remover", (req, res)=> {
-    const result = crudGroups.deleteGroupById(req.body.groupId, req.body.userId); 
+    const result = groupService.deleteGroupById(req.body.groupId, req.body.userId); 
     if(result === true) {        
         res.status(200).json(response(true, "Grupo removido."));
     }else {
@@ -118,7 +118,7 @@ app.delete("/grupos/remover", (req, res)=> {
 });
 
 app.get("/grupos/detalhes", (req, res)=> {
-    const result = crudGroups.groupDetails(req.body.groupId); 
+    const result = groupService.groupDetails(req.body.groupId); 
     if(JSON.stringify(result) === '{}') {
         res.status(404).json(response(true, "Grupo não encontrado."));
     }else {
