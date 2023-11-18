@@ -44,11 +44,12 @@ app.get("/amigos", checkJwt, (req, res)=> {
 });
 
 app.delete("/amigos/excluir/:id", checkJwt, (req, res)=> {
-    if(crudFriends.deleteFriendById(req.params.id, checkJwt.id)){
-        res.status(404).json(response(false, "Amigo nao encontrado"));
-    }else{
-        res.status(204).json();
+    let result = crudFriends.deleteFriendById(req.params.id, req.id); 
+    if(result !== -1 || result !== false){
+        crud.updateUsers(result, req.id)
+        res.status(200).json()
     }
+    res.status(404).json();
 });
 
 app.get("/usuarios", checkJwt ,(req, res)=> {

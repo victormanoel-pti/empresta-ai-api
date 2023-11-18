@@ -8,12 +8,9 @@
       "dataNascimento": "",
       "email": "victor@email.com",
       "senha": "123",
-      "amigos": {
-        "nome": "Andre",
-        "email": "andre@email.com",
-        "id": "123"
-      },
+      "amigos": [],
       "id": "3bee14b1-f9a1-4354-9aad-10f9ae99ec42"
     }
+    
   ]
 }

@@ -3,8 +3,13 @@ import fs from "fs";
 const filePath = `/src/utils/users.json`;
 
 const crud = {
-    updateUsers(data){
+    updateUsers(data, id = ""){
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
+        for(let i =0; i < fileData.users.length; i++){
+            if(fileData.users[i].id === data.id){
+                fileData.users[i] = data;
+            }
+        }
         fileData.users.push(data);
         fs.writeFileSync(`${process.cwd()}${filePath}`, JSON.stringify(fileData, null, 2));
     },
@@ -23,6 +28,21 @@ const crud = {
                     "found": true,
                     "user": fileData.users[i]
                 }
+            }else{
+                return -1;
+            }
+        }
+        
+    },
+
+    findUserById(id){
+        let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
+        if(fileData.users.length === undefined || fileData.users.length === "undefined"){
+            return false;
+        }
+        for (let i = 0; i < fileData.users.length; i++) {
+            if(fileData.users[i].id === id){
+                return fileData.users[i];
             }else{
                 return -1;
             }
