@@ -3,12 +3,11 @@ import fs from "fs";
 const filePath = `/src/databases/groups.json`;
 
 const crudGroups = {
-    addGroup(data, id = ""){
+    addGroup(data, id = "") {
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
-
         
-            for(let i =0; i < fileData.groups.length; i++){
-                if(fileData.groups[i].id === data.id){
+            for(let i =0; i < fileData.groups.length; i++) {
+                if(fileData.groups[i].id === data.id) {
                     fileData.groups[i] = data;
                 }
             }
@@ -17,25 +16,27 @@ const crudGroups = {
         fs.writeFileSync(`${process.cwd()}${filePath}`, JSON.stringify(fileData, null, 2));
     },
 
-    findGroupsByUserId(userId){
+    findGroupsByUserId(userId) {
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
+        let userGroups = [];
 
         if(fileData.groups.length === undefined || fileData.groups.length === "undefined"){
             return false;
-        }
+        }        
 
         for (let i = 0; i < fileData.groups.length; i++) {
-            if(fileData.groups[i].userId === userId){
-                return fileData.groups[i];
-            }else{
-                return -1;
+            if(fileData.groups[i].userId === userId) {
+                userGroups.push(groups[i]);
             }
-        }        
+        }
+
+        return userGroups;
     },
 
-    deleteGroupById(groupId, userId){
+    deleteGroupById(groupId, userId) {
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
         const {groups} = fileData;
+
         for(let i = 0; i < groups.length; i++) {
             if(groups[i].userId === userId && groups[i].id === groupId) {
                 groups.splice(i, 1);
@@ -44,8 +45,34 @@ const crudGroups = {
                 return true;
             }
         }
+
+        return false;
+    },
+
+    groupDetails(groupId) {
+        let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
+        const {groups} = fileData;
+    
+        for (let i = 0; i < groups.length; i++) {
+            if(groups[i].id === groupId) {
+                return groups[i];
+            }
+        }
         return false;
     }
+
+    // groupOut(groupId,) {
+    //     let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
+    //     const {groups} = fileData;
+    
+    //     for (let i = 0; i < groups.length; i++) {
+    //         if(groups[i].id === groupId) {
+    //             return groups[i];
+    //         }
+    //     }
+    //     return false;
+    // }
 }
+
 
 export default crudGroups;

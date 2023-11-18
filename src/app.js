@@ -85,7 +85,7 @@ app.post("/cadastro", (req, res)=> {
     }        
 });
 
-app.post("/criarGrupo", (req, res) => {
+app.post("/grupos/criar", (req, res) => {
     if(compareKeys(req.body, groupModel)){
         if(isObjectKeysEmpty(req.body)){
             res.status(400).json(response(false, "Campo(s) não preenchido(s)."));
@@ -99,22 +99,40 @@ app.post("/criarGrupo", (req, res) => {
     }        
 });
 
-app.get("/grupos", checkJwt, (req, res)=> {
-    let data = crudGroups.findGroupsByUserId(req.body.userId);
-    if(JSON.stringify(data) === '{}'){
+app.get("/grupos/meus-grupos", checkJwt, (req, res)=> {
+    const result = crudGroups.findGroupsByUserId(req.body.userId);
+    if(JSON.stringify(result) === '{}'){
         res.status(404).json(response(true, "Não há grupos para esse usuário."));
     }else{
-        res.status(200).json(response(true, data));
+        res.status(200).json(response(true, result));
     }
 });
 
-app.delete("/removerGrupo", (req, res)=> {
-    let result = crudGroups.deleteGroupById(req.body.groupId, req.body.userId); 
+app.delete("/grupos/remover", (req, res)=> {
+    const result = crudGroups.deleteGroupById(req.body.groupId, req.body.userId); 
     if(result === true) {        
         res.status(200).json(response(true, "Grupo removido."));
     }else {
         res.status(400).json(response(false, "Houve um problema ao remover o grupo."));
     }
 });
+
+app.get("/grupos/detalhes", (req, res)=> {
+    const result = crudGroups.groupDetails(req.body.groupId); 
+    if(JSON.stringify(result) === '{}') {
+        res.status(404).json(response(true, "Grupo não encontrado."));
+    }else {
+        res.status(200).json(response(true, result));
+    }
+});
+
+// app.post("/grupos/sair", (req, res)=> {
+//     const result = crudGroups.groupDetails(req.body.groupId, req.body.userId); 
+//     if(JSON.stringify(result) === '{}') {
+//         res.status(404).json(response(true, "Grupo não encontrado."));
+//     }else {
+//         res.status(200).json(response(true, result));
+//     }
+// });
 
 export default app;
