@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const filePath = `/src/utils/users.json`;
+const filePath = `/src/databases/users.json`;
 
 const crudFriends = {
     

@@ -1,9 +1,9 @@
 import fs from "fs";
 
-const filePath = `/src/utils/users.json`;
+const filePath = `/src/databases/users.json`;
 
-const crud = {
-    updateUsers(data, id = ""){
+const crudUsers = {
+    addUsers(data, id = ""){
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
         for(let i =0; i < fileData.users.length; i++){
             if(fileData.users[i].id === data.id){
@@ -52,7 +52,7 @@ const crud = {
 
     findLogin(email, password){
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
-        const {users} = fileData;
+        const {users} = fileData;        
         for(let i = 0; i < users.length; i++){
             if(users[i].email === email && users[i].senha === password){
                 return users[i];
@@ -63,4 +63,4 @@ const crud = {
 
 }
 
-export default crud;
+export default crudUsers;

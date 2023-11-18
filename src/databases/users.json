@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "nome": "Victor",
+      "sobrenome": "Manoel",
+      "cidade": "SP",
+      "genero": "M",
+      "dataNascimento": "",
+      "email": "victor@email.com",
+      "senha": "123",
+      "amigos": [],
+      "id": "3bee14b1-f9a1-4354-9aad-10f9ae99ec42"
+    },
+    {
+      "nome": "John",
+      "sobrenome": "Doe",
+      "cidade": "SP",
+      "genero": "M",
+      "dataNascimento": "02-11-1998",
+      "email": "john@email.com",
+      "senha": "123john",
+      "amigos": {
+        "nome": "Victor",
+        "email": "victor@email.com",
+        "id": "3bee14b1-f9a1-4354-9aad-10f9ae99ec42"
+      },
+      "id": "0b9d8009-63a2-4107-80c0-d6ac0fdb31d9"
+    }
+  ]
+}
