@@ -53,14 +53,13 @@ const crudUsers = {
     findLogin(email, password){
         let fileData = JSON.parse(fs.readFileSync(`${process.cwd()}${filePath}`));
         const {users} = fileData;        
-        for(let i = 0; i < users.length; i++){
-            if(users[i].email === email && users[i].senha === password){
+        for(let i = 0; i < users.length; i++) {            
+            if(users[i].email === email && users[i].senha === password) {                
                 return users[i];
             }
-            return false;
         }
+        return false;
     }
-
 }
 
 export default crudUsers;
