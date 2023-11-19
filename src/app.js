@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import jsonwebtoken from "jsonwebtoken";
 import {v4 as uuid} from "uuid";
 import compareKeys from "./utils/compareKeys.js";
@@ -16,6 +17,9 @@ let jwt = jsonwebtoken;
 let blacklist = [];
 let usuarios = [];
 
+app.use(cors({
+    origin: "*"
+}));
 app.use(express.json());
 
 function checkJwt(req, res, next) {
