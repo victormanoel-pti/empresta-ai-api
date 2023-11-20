@@ -40,7 +40,7 @@ app.get("/amigos", checkJwt, (req, res)=> {
         if(usuarios[i].id === req.id){
             console.log(usuarios[i].amigos.length)
             if(usuarios[i].amigos.length <= 0){
-                if(Object.keys(usuarios[i].amigos[0]).length === 0){
+                if(Object.keys(usuarios[i].amigos).length === 0){
                     res.status(404).json(response(true, "Amigos não encontrados."));
                 }
             }
@@ -49,12 +49,24 @@ app.get("/amigos", checkJwt, (req, res)=> {
     }
 });
 
+app.post("/amigos", checkJwt, (req, res)=> {
+    for(let i= 0; i < usuarios.length; i++){
+        if(usuarios[i].id === req.id){
+            req.body.id = uuid();
+            usuarios[i].amigos.push(req.body);
+            res.status(200).json(response(true, "Amigo adicionado com sucesso."));
+        }
+    }
+    res.status(400).json(response(400, "Erro ao adicionar o amigo."));
+});
+
 app.delete("/amigos/excluir/:id", checkJwt, (req, res)=> {
     for(let i =0; i < usuarios.length; i++){
         if(usuarios[i].id === req.id){
             for(let j = 0; j < usuarios[i].amigos.length; j++){
                 console.log(usuarios[i].amigos[j].id);
                 if(usuarios[i].amigos[j].id === req.params.id){
+                    console.log(usuarios[i].amigos[j])
                     usuarios[i].amigos.splice(usuarios[i].amigos[j], 1);
                     res.status(204).json()
                 }
@@ -92,6 +104,9 @@ app.post("/cadastro", (req, res)=> {
             res.status(400).json(response(false, "Campo(s) inválido(s)."));
         }else{
             req.body.id = uuid();
+            for(let i =0; i < req.body.amigos.length; i++){
+                req.body.amigos[i].id = uuid();
+            }
             usuarios.push(req.body);
             res.status(201).json(response(true, "Cadastro realizado com sucesso."));
         }
@@ -148,6 +163,19 @@ app.get("/grupos/detalhes/:id", (req, res)=> {
         }
     }
     res.status(404).json(response(false, "Grupo não encontrado."));
+});
+
+app.patch("/grupos/editar/:id", checkJwt, (req,res)=> {
+    for(let i = 0; i < grupos.length; i++){
+        if(grupos[i].grupoId === req.params.id){
+            req.body.grupoId = req.params.id;
+            req.body.userId = req.id;
+            grupos[i] = req.body;
+            res.status(200).json(response(true, "Grupo editado com sucesso."));
+        }
+    }
+    res.status(404).json(response(false, "Houve um erro ao editar o grupo."));
+
 });
 
 export default app;
