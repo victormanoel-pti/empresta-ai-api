@@ -6,7 +6,7 @@ const userModel = {
     "dataNascimento":"",
     "email":"",
     "senha":"",
-    "amigos": [{}]
+    "amigos": []
 }
 
 const groupModel = {

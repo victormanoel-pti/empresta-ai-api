@@ -55,7 +55,7 @@ app.post("/amigos", checkJwt, (req, res)=> {
         if(usuarios[i].id === req.id){
             req.body.id = uuid();
             usuarios[i].amigos.push(req.body);
-            res.status(200).json(response(true, "Amigo adicionado com sucesso."));
+            res.status(201).json(response(true, "Amigo adicionado com sucesso!"));
         }
     }
     res.status(400).json(response(400, "Erro ao adicionar o amigo."));
