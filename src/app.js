@@ -23,7 +23,8 @@ app.use(express.json());
 function checkJwt(req, res, next) {
     const token = req.headers["authorization"];
     jwt.verify(token, secret, (err, decodedJwt)=> {
-        if(err){
+        if(err || blacklist.includes(token)){
+            console.log(blacklist)
             return res.status(401).json();
         }
         req.id = decodedJwt.id;
@@ -93,9 +94,9 @@ app.post("/login", (req, res)=> {
     res.status(401).json(response(false, "Email e/ou senha incorreto(s)"));
 });
 
-app.post("/logout", (req, res)=> {
+app.post("/logout", checkJwt,(req, res)=> {
     blacklist.push(req.headers["authorization"]);
-    res.status(201).json(response(true, "Usuário deslogado"));
+    res.status(200).json(response(true, "Usuário deslogado"));
 });
 
 app.post("/cadastro", (req, res)=> {
