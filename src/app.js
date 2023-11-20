@@ -6,9 +6,6 @@ import compareKeys from "./utils/compareKeys.js";
 import { userModel, groupModel } from "./utils/models.js";
 import isObjectKeysEmpty from "./utils/isObjectKeysEmpty.js";
 import response from "./utils/response.js";
-import userService from "./utils/user-service.js";
-import friendService from "./utils/friend-service.js";
-import groupService from "./utils/group-service.js";
 
 const app = express();
 const secret = "123";
