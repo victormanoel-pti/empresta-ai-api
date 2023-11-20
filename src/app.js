@@ -66,7 +66,7 @@ app.delete("/amigos/excluir/:id", checkJwt, (req, res)=> {
 });
 
 app.get("/usuarios", checkJwt,(req, res)=> {
-    console.log(req.email + " esta chamando.");
+    console.log(req.id + " esta chamando.");
     res.status(200).json(usuarios);
 })
 
