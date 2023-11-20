@@ -6,14 +6,16 @@ const userModel = {
     "dataNascimento":"",
     "email":"",
     "senha":"",
-    "amigos": {}
+    "amigos": [{}]
 }
 
 const groupModel = {
-    "userId":"",
-    "nome":"",
-    "productName":"",
-    "productDescription":""
-}
+    //"userId":"",
+    //"grupoId": "",
+    "nomeGrupo":"",
+    "emails":[{}],
+    "nomeProduto": "",
+    "descricaoProduto":""
+};
 
 export { userModel, groupModel };
