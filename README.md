@@ -32,4 +32,4 @@ Após revisitar o projeto apresentado na primeira etapa, definimos a jornada de 
  - > node server.js
  - Agora, basta chamar as rotas!
 
-
+As rotas também podem ser chamadas através de *https://empresta-ai.onrender.com*.
