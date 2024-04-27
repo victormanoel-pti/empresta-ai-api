@@ -1,9 +1,17 @@
 import express from "express";
 import cors from "cors";
 import jsonwebtoken from "jsonwebtoken";
+import { createClient } from "@supabase/supabase-js";
+import { validationResult } from "express-validator";
+import "dotenv/config.js"
 import response from "./utils/response.js";
-import sql from "./databases/db.js";
+import { cadastroValidator } from "./utils/validators.js";
+import { doesEmailExists } from "./utils/findUserEmail.js";
+import { hash } from "bcrypt";
 
+
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 
 const app = express();
 const secret = "123";
@@ -15,6 +23,7 @@ let blacklist = [];
 app.use(cors({
     origin: "*"
 }));
+
 app.use(express.json());
 
 function checkJwt(req, res, next) {
@@ -29,17 +38,30 @@ function checkJwt(req, res, next) {
     })
 }
 
+function supabaseJwt(req, res, next){
+    const token = req.headers["authorization"];
+    jwt.verify(token, secret, (error, decodedJwt) => {
+        if(error){
+            console.log(error)
+        }else{
+            console.log(decodedJwt)
+            req.userId = decodedJwt.id;
+            next();
+        }
+    });
+}
+
+
 app.get("/", (req, res)=> {
     res.status(200).json(response(true, "API Funcionando!"));
 });
 
 app.get("/amigos", async (req, res)=> {
-   let buscarAmigos = await sql`select (amigos) from usuarios where id=8;`;
-   console.log(buscarAmigos)
-   if(buscarAmigos[0] === null){
-    return res.status(404).json(response(true, "Usuário não possui amigos cadastrados."));
+   let {error, data} = await supabase.from('usuarios').select('amigos').eq('id', 8);
+   if(error === null && data.length <= 0){
+    return res.status(404).json(response(false, "Usuário não possui amigos cadastrados."));
    }else{
-    return res.status(200).json(buscarAmigos[0]);
+    return res.status(200).json(response(true, data));
    }
 });
 
@@ -56,14 +78,30 @@ app.delete("/amigos/excluir/:id", checkJwt, (req, res)=> {
 });
 
 app.get("/usuarios", async (req, res)=> {
-    let buscarUsuarios = await sql`select * from usuarios;`;
-    res.status(200).json(response(true, buscarUsuarios));
-})
+    let { data: usuarios, error } = await supabase.from('usuarios').select('*');
+    if(error){
+        return res.status(400).json(response(false, "Erro ao buscar usuários."));
+    }else{
+        return res.status(200).json(response(true, usuarios));
+    }
+    
+});
 
-app.post("/login", (req, res)=> {
-    /**
-     * TODO: Implementar login e geracao de token
-     */
+app.post("/login", async(req, res)=> {
+    
+    //let buscarEmail = await supabase.from('usuarios').select('email').eq('email', req.body.email);
+    //if(buscarEmail.data.length <= 0 || buscarEmail.error){
+    //    return res.status(401).json(response(false, "Usuário não possui cadastro."));
+    //}else{
+        //console.log(`Achou o email ${buscarEmail.data[0].email}`);
+        
+        let responseSupa = await supabase.auth.signInWithPassword({
+            email: req.body.email,
+            password: req.body.senha
+        });
+        return res.status(200).json(responseSupa);
+    //}
+    
 });
 
 app.post("/logout", checkJwt,(req, res)=> {
@@ -72,10 +110,23 @@ app.post("/logout", checkJwt,(req, res)=> {
      */
 });
 
-app.post("/cadastro", async (req, res)=> {
-    /**
-     * TODO: Cadastrar usuario
-     */
+app.post("/cadastro", cadastroValidator, async (req, res)=> {
+    const errors = validationResult(req);
+    if(errors.isEmpty()){
+        const { nome, sobrenome, cidade, genero, dataNascimento, email, senha, amigos} = req.body;
+        if (await doesEmailExists(email)){
+            return res.status(400).json(response(false, "Email já cadastrado."));
+        }else{
+            const { data, error } = await supabase
+            .from('usuarios')
+            .insert([
+                { nome, sobrenome, cidade, genero, data_nascimento: dataNascimento, email, senha: await hash(senha, 8), amigos},
+            ])
+            .select()
+            return res.status(201).json(response(true, "Usuário cadastrado com sucesso."));
+        }
+    }
+    return res.status(400).json(errors.array());
 });
 
 app.post("/grupos/criar", checkJwt,(req, res) => {
