@@ -22,7 +22,7 @@ app.use(cors({
 
 app.use(express.json());
 
-function supabaseJwt(req, res, next){
+function decodeJwt(req, res, next){
     const token = req.headers["authorization"];
     jwt.verify(token, process.env.SUPABASE_JWT_SECRET, async (error, decodedJwt) => {
         if(error){
@@ -41,7 +41,7 @@ app.get("/", (req, res)=> {
     res.status(200).json(response(true, "API Funcionando!"));
 });
 
-app.get("/amigos" , supabaseJwt,async (req, res)=> {
+app.get("/amigos" , decodeJwt,async (req, res)=> {
    let {data} = await supabase.from('usuarios').select('amigos').eq('id', req.userId);
    if(data[0].amigos.length <= 0 ){
     return res.status(404).json(response(false, "Usuário não possui amigos cadastrados."));
@@ -62,7 +62,7 @@ app.delete("/amigos/excluir/:id", (req, res)=> {
      */
 });
 
-app.get("/usuarios", supabaseJwt ,async (req, res)=> {
+app.get("/usuarios", decodeJwt ,async (req, res)=> {
     let { data: usuarios, error } = await supabase.from('usuarios').select('*');
     if(error){
         return res.status(400).json(response(false, "Erro ao buscar usuários."));
@@ -84,10 +84,11 @@ app.post("/login", async(req, res)=> {
     }
 });
 
-app.post("/logout",(req, res)=> {
-    /**
-     * TODO: Implementar logout e desabilitar o token
+app.post("/logout", decodeJwt ,async (req, res)=> {
+    /** 
+     * Implementar logout e desabilitar token
      */
+    
 });
 
 app.post("/cadastro", cadastroValidator, async (req, res)=> {
