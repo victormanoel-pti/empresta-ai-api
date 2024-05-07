@@ -8,6 +8,7 @@ import response from "./utils/response.js";
 import { cadastroValidator } from "./utils/validators.js";
 import { doesEmailExists } from "./utils/findUserEmail.js";
 import { hash } from "bcrypt";
+import checkForbiddenList from "./utils/checkForbbidenList.js";
 
 
 
@@ -22,10 +23,11 @@ app.use(cors({
 
 app.use(express.json());
 
-function decodeJwt(req, res, next){
+async function decodeJwt(req, res, next){
     const token = req.headers["authorization"];
+    let getTokens = await supabase.from('logged_out_tokens').select('tokens');
     jwt.verify(token, process.env.SUPABASE_JWT_SECRET, async (error, decodedJwt) => {
-        if(error){
+        if(error || checkForbiddenList(getTokens.data[0].tokens, req.headers['authorization'])){
             return res.status(401).json(response(true, "Token inválido."));
         }else{
             const {data} = await supabase.from('usuarios').select('id').eq('email', decodedJwt.email );
@@ -85,9 +87,18 @@ app.post("/login", async(req, res)=> {
 });
 
 app.post("/logout", decodeJwt ,async (req, res)=> {
-    /** 
-     * Implementar logout e desabilitar token
-     */
+
+    let {data, error} = await supabase.from('logged_out_tokens').select('tokens').eq('id', 1);
+    if(error){
+        res.status(400).json(response(false, "Token inválido"));
+    }
+    data[0].tokens.push(req.headers['authorization'])
+
+    const update = await supabase.from('logged_out_tokens').update({tokens: data[0].tokens}).eq('id', 1).select()
+    if(update.error){
+        res.status(400).json(response(false, "Erro ao deslogar usuário."));
+    }
+    res.status(200).json(response(true, "Usuário deslogado!"));
     
 });
 
