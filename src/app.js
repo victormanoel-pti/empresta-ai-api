@@ -25,16 +25,18 @@ app.use(express.json());
 
 async function decodeJwt(req, res, next){
     const token = req.headers["authorization"];
+    const secret = process.env.SUPABASE_JWT_SECRET;
     let getTokens = await supabase.from('logged_out_tokens').select('tokens');
-    jwt.verify(token, process.env.SUPABASE_JWT_SECRET, async (error, decodedJwt) => {
-        if(error || checkForbiddenList(getTokens.data[0].tokens, req.headers['authorization'])){
-            return res.status(401).json(response(true, "Token inválido."));
-        }else{
-            const {data} = await supabase.from('usuarios').select('id').eq('email', decodedJwt.email );
-            req.userEmail = decodedJwt.email;
-            req.userId = data[0].id; // id do usuário no banco para consultas
-            next();
+    let tokens = getTokens.data[0].tokens;
+
+    jwt.verify(token, secret, async (error, decodedJwt) => {
+        if(error || checkForbiddenList( tokens, token)){
+            return res.status(401).json(response(false, "Token inválido."));
         }
+        const {data} = await supabase.from('usuarios').select('id').eq('email', decodedJwt.email );
+        req.userEmail = decodedJwt.email;
+        req.userId = data[0].id; // id do usuário no banco para consultas
+        next();
     });
 }
 
@@ -68,9 +70,8 @@ app.get("/usuarios", decodeJwt ,async (req, res)=> {
     let { data: usuarios, error } = await supabase.from('usuarios').select('*');
     if(error){
         return res.status(400).json(response(false, "Erro ao buscar usuários."));
-    }else{
-        return res.status(200).json(response(true, usuarios));
     }
+    return res.status(200).json(response(true, usuarios));
     
 });
 
@@ -81,12 +82,11 @@ app.post("/login", async(req, res)=> {
     });
     if(error){
         return res.status(401).json(response(true, "Usuário ou senha inválido(s)."));
-    }else{
-        return res.status(201).json(response(true, data.session.access_token));
     }
+    return res.status(201).json(response(true, data.session.access_token));
 });
 
-app.post("/logout", decodeJwt ,async (req, res)=> {
+app.post("/logout", decodeJwt, async (req, res)=> {
 
     let {data, error} = await supabase.from('logged_out_tokens').select('tokens').eq('id', 1);
     if(error){
