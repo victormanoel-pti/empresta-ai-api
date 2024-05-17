@@ -120,10 +120,18 @@ app.post("/cadastro", cadastroValidator, async (req, res)=> {
     return res.status(400).json(errors.array());
 });
 
-app.post("/grupos/criar",(req, res) => {
-    /**
-     * TODO: Implementar adicição de grupo
-     */   
+app.post("/grupos/criar", decodeJwt ,async (req, res) => {
+    
+    const { nome, participante, foto_perfil} = req.body;
+    const {data, error} = await supabase.from('grupo').insert(
+        [{
+            nome, participante, foto_perfil
+        }]
+    ).select()
+    if(error){
+        res.status(400).json(response(false, error));
+    }
+    res.status(200).json(response(true, "Grupo criado com sucesso."));
 });
 
 app.get("/grupos/meus-grupos", (req, res)=> {
