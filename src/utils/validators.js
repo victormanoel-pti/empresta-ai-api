@@ -35,3 +35,16 @@ export const grupoValidador = [
     .not().isEmpty()
     .isLength({min: 3, max: 20})
 ];
+
+export const grupoEditarValidador = [
+    body("detalhe")
+    .exists()
+    .not().isEmpty(),
+    body("nome")
+    .exists()
+    .not().isEmpty(),
+    body("foto_perfil")
+    .exists()
+    .not().isEmpty()
+
+]

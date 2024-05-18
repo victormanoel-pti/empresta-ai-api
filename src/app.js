@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { param, validationResult } from "express-validator";
 import "dotenv/config.js";
 import response from "./utils/response.js";
-import { cadastroValidator, grupoValidador } from "./utils/validators.js";
+import { cadastroValidator, grupoEditarValidador, grupoValidador } from "./utils/validators.js";
 import { doesEmailExists } from "./utils/findUserEmail.js";
 import { hash } from "bcrypt";
 import checkForbiddenList from "./utils/checkForbbidenList.js";
@@ -178,11 +178,27 @@ app.get("/grupos/detalhes/:id", decodeJwt,  async(req, res)=> {
     return res.status(200).json(response(true, data));
 });
 
-app.patch("/grupos/editar/:id", (req,res)=> {
-    /**
-     * Implementar edicao do grupo
-     */
-
+app.patch("/grupos/editar/:id", grupoEditarValidador ,decodeJwt, async(req,res)=> {
+    const errors = validationResult(req);
+    if(errors.isEmpty()){
+        const {data, error} = await supabase.from('grupo').select('proprietario').eq('id', req.params.id);
+        const {foto_perfil, nome, detalhe} = req.body;
+        if(error || data.length <= 0){
+            return res.status(404).json(response(false, "Grupo não encontrado."));
+        }else{
+            if(data[0].proprietario === req.userEmail){
+            await supabase
+                .from('grupo')
+                .update({ foto_perfil, nome, detalhe })
+                .eq('id', req.params.id)
+                .select();
+                return res.status(200).json(response(true, "Editado com sucesso!"));
+            }
+        }
+    }
+    
+    
+    return res.status(400).json(response(false, "Informe os campos."));
 });
 
 export default app;
