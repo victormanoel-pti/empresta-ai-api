@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import jsonwebtoken from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
-import { validationResult } from "express-validator";
+import { param, validationResult } from "express-validator";
 import "dotenv/config.js";
 import response from "./utils/response.js";
 import { cadastroValidator, grupoValidador } from "./utils/validators.js";
@@ -126,7 +126,7 @@ app.post("/grupos/criar", decodeJwt, grupoValidador, async (req, res) => {
         const { nome, foto_perfil} = req.body;
         const {data, error} = await supabase.from('grupo').insert(
             [{
-                nome, participante: [req.userId], foto_perfil
+                nome, participante: [req.userEmail], foto_perfil, proprietario: req.userEmail
             }]
         ).select()
         if(error){
@@ -137,19 +137,37 @@ app.post("/grupos/criar", decodeJwt, grupoValidador, async (req, res) => {
     return res.status(400).json(response(false, errors))
 });
 
-app.get("/grupos/meus-grupos", (req, res)=> {
+app.get("/grupos/meus-grupos", decodeJwt, async(req, res)=> {
 
-    /** 
-     * Implementar busca de grupos do usuario
-     */
+        //const {data, error} = await supabase.from('grupo').select().contains('participante', [req.userEmail]);
+        console.log([`${req.userEmail}`])
+        
+        const { data, error } = await supabase
+        .from('grupo')
+        .select()
+        .in('participante', ['grupo@gmail.com'])
+        
+        console.log(error)
+        return res.status(200).json(data);
+    
     
 });
 
-app.delete("/grupos/remover/:id", (req, res)=> {
-    /**
-     * Implementar remoção de um usuario do grupo 
-     */
+app.delete("/grupos/remover/:id",decodeJwt , async(req, res)=> {
+    const {data, error} = await supabase.from('grupo').select('proprietario').eq('id', req.params.id);
+    if(error || data.length <= 0){
+        return res.status(401).json()
+    }else{
+        if(data[0].proprietario === req.userEmail){
+            await supabase
+            .from('grupo')
+            .delete()
+            .eq('id', req.params.id);
+            return res.status(204).json();
+        }
+    }
     
+    return res.status(401).json()
 });
 
 app.get("/grupos/detalhes/:id", (req, res)=> {
