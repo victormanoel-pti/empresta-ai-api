@@ -53,10 +53,15 @@ app.get("/amigos" , decodeJwt,async (req, res)=> {
     return res.status(200).json(response(true, data));
 });
 
-app.post("/amigos", (req, res)=> {
-    /**
-     * TODO: Implementar a validação dos campos e efetuar a criação de amigos
-     */
+app.post("/amigos", decodeJwt, async(req, res)=> {
+    const buscarAmigos = await supabase.from('usuarios').select('amigos').eq('id', req.userId);
+    buscarAmigos.data[0].amigos.push(req.body.amigo_id)
+    const { data } = await supabase
+    .from('usuarios')
+    .update({ amigos: buscarAmigos.data[0].amigos })
+    .eq('id', req.userId)
+    .select()
+  return res.status(200).json(response(true, data));
 });
 
 app.delete("/amigos/excluir/:id", (req, res)=> {
