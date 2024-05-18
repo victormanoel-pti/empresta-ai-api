@@ -65,14 +65,6 @@ app.delete("/amigos/excluir/:id", (req, res)=> {
      */
 });
 
-app.get("/usuarios", decodeJwt ,async (req, res)=> {
-    let { data: usuarios, error } = await supabase.from('usuarios').select('*');
-    if(error){
-        return res.status(400).json(response(false, "Erro ao buscar usuários."));
-    }
-    return res.status(200).json(response(true, usuarios));
-    
-});
 
 app.post("/login", async(req, res)=> {
     let {data, error} = await supabase.auth.signInWithPassword({
@@ -139,16 +131,9 @@ app.post("/grupos/criar", decodeJwt, grupoValidador, async (req, res) => {
 
 app.get("/grupos/meus-grupos", decodeJwt, async(req, res)=> {
 
-        //const {data, error} = await supabase.from('grupo').select().contains('participante', [req.userEmail]);
-        console.log([`${req.userEmail}`])
-        
-        const { data, error } = await supabase
-        .from('grupo')
-        .select()
-        .in('participante', ['grupo@gmail.com'])
-        
-        console.log(error)
-        return res.status(200).json(data);
+        /**
+         * Implementar busca de grupos
+         */
     
     
 });
