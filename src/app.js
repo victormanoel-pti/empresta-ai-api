@@ -65,10 +65,19 @@ app.post("/amigos", decodeJwt, async(req, res)=> {
   return res.status(200).json(response(true, data));
 });
 
-app.delete("/amigos/excluir/:id", (req, res)=> {
-    /**
-     * TODO: Implementar a remoção de amigos
-     */
+app.delete("/amigos/excluir/:id", decodeJwt ,async(req, res)=> {
+    let {data} = await supabase.from('usuarios').select('amigos').eq('id', req.userId);
+    if(data[0].amigos.length <= 0 ){
+        return res.status(404).json(response(false, "Usuário não possui amigos cadastrados."));
+    }
+    const index = data[0].amigos.indexOf(req.params.id);
+    if (index > -1) { 
+        data[0].amigos.splice(index, 1);
+        await supabase.from('usuarios').update({amigos: data[0].amigos}).eq('id', req.userId);
+        return res.status(204).json();
+    }
+    return res.status(404).json(response(false, "Erro ao encontrar o amigo."));
+    
 });
 
 
