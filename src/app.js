@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { validationResult } from "express-validator";
 import "dotenv/config.js";
 import response from "./utils/response.js";
-import { cadastroValidator } from "./utils/validators.js";
+import { cadastroValidator, grupoValidador } from "./utils/validators.js";
 import { doesEmailExists } from "./utils/findUserEmail.js";
 import { hash } from "bcrypt";
 import checkForbiddenList from "./utils/checkForbbidenList.js";
@@ -120,18 +120,21 @@ app.post("/cadastro", cadastroValidator, async (req, res)=> {
     return res.status(400).json(errors.array());
 });
 
-app.post("/grupos/criar", decodeJwt ,async (req, res) => {
-    
-    const { nome, participante, foto_perfil} = req.body;
-    const {data, error} = await supabase.from('grupo').insert(
-        [{
-            nome, participante, foto_perfil
-        }]
-    ).select()
-    if(error){
-        res.status(400).json(response(false, error));
+app.post("/grupos/criar", decodeJwt, grupoValidador, async (req, res) => {
+    const errors = validationResult(req);
+    if(errors.isEmpty()){
+        const { nome, foto_perfil} = req.body;
+        const {data, error} = await supabase.from('grupo').insert(
+            [{
+                nome, participante: [req.userId], foto_perfil
+            }]
+        ).select()
+        if(error){
+            res.status(400).json(response(false, error));
+        }
+        return res.status(200).json(response(true, "Grupo criado com sucesso."));
     }
-    res.status(200).json(response(true, "Grupo criado com sucesso."));
+    return res.status(400).json(response(false, errors))
 });
 
 app.get("/grupos/meus-grupos", (req, res)=> {

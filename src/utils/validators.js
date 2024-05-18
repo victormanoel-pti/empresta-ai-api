@@ -28,3 +28,10 @@ export const cadastroValidator = [
     body("amigos").exists()
     .isArray()
 ];
+
+
+export const grupoValidador = [
+    body("nome").exists()
+    .not().isEmpty()
+    .isLength({min: 3, max: 20})
+];
