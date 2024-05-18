@@ -131,10 +131,11 @@ app.post("/grupos/criar", decodeJwt, grupoValidador, async (req, res) => {
 
 app.get("/grupos/meus-grupos", decodeJwt, async(req, res)=> {
 
-        /**
-         * Implementar busca de grupos
-         */
-    
+    const {data, error} = await supabase.from('grupo').select().contains('participante', [req.userEmail]);
+    if(error || data.length <= 0){
+        return res.status(404).json(response(false, "Você não possui grupos."));
+    }
+    return res.status(200).json(response(true, data));
     
 });
 
