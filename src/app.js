@@ -170,10 +170,12 @@ app.delete("/grupos/remover/:id",decodeJwt , async(req, res)=> {
     return res.status(401).json()
 });
 
-app.get("/grupos/detalhes/:id", (req, res)=> {
-    /**
-     * Implementar busca de detalhes do grupo
-     */
+app.get("/grupos/detalhes/:id", decodeJwt,  async(req, res)=> {
+    const {data, error} = await supabase.from('grupo').select('detalhe').eq('id', req.params.id);
+    if(error  || data.length <= 0){
+        return res.status(404).json(response(false, "Detalhes do grupo não encontrados."))
+    }
+    return res.status(200).json(response(true, data));
 });
 
 app.patch("/grupos/editar/:id", (req,res)=> {
