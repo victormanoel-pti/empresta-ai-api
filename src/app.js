@@ -50,7 +50,8 @@ app.get("/amigos" , decodeJwt,async (req, res)=> {
    if(data[0].amigos.length <= 0 ){
     return res.status(404).json(response(false, "Usuário não possui amigos cadastrados."));
    }
-    return res.status(200).json(response(true, data));
+   const buscarAmigos = await supabase.from('usuarios').select().in('id', data[0].amigos)
+   return res.status(200).json(response(true, buscarAmigos.data));
 });
 
 app.post("/amigos", decodeJwt, async(req, res)=> {
