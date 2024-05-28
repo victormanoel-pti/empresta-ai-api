@@ -22,7 +22,8 @@ Após revisitar o projeto apresentado na primeira etapa, definimos a jornada de 
 - Node JS;
 - Express JS;
 - JWT;
-- Nodemon.
+- Nodemon;
+- Supabase.
 
 ### Como iniciar o projeto
  - Abra o terminal na raiz do projeto;
